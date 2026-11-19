@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_widget_outer"
+    android:padding="12dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI 額度錶"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_sync_status"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="8dp"
+            android:text="本機模式"
+            android:textColor="#9CA3AF"
+            android:textSize="11sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/btn_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_refresh_pill"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:text="↻ 同步"
+            android:textColor="#E5E7EB"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+    <!-- Row 1: Gemini PRO + ChatGPT PLUS -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:layout_marginBottom="8dp">
+
+        <!-- 1. Gemini PRO -->
+        <LinearLayout
+            android:id="@+id/card_gemini"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginRight="4dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Gemini"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_pro"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:text="PRO"
+                    android:textColor="#FCD34D"
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_gm_week"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="週 0% · 待機"
+                android:textColor="#34D399"
+                android:textSize="10.5sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginBottom="3dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:layout_marginBottom="5dp">
+                <ProgressBar
+                    android:id="@+id/pb_gm_week_green"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_green" />
+                <ProgressBar
+                    android:id="@+id/pb_gm_week_amber"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_amber" />
+                <ProgressBar
+                    android:id="@+id/pb_gm_week_red"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_red" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_gm_sess"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="段 0% · 3h視窗"
+                android:textColor="#CBD5E1"
+                android:textSize="10.5sp"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginBottom="3dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="5dp">
+                <ProgressBar
+                    android:id="@+id/pb_gm_sess_green"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_green" />
+                <ProgressBar
+                    android:id="@+id/pb_gm_sess_amber"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_amber" />
+                <ProgressBar
+                    android:id="@+id/pb_gm_sess_red"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_red" />
+            </FrameLayout>
+        </LinearLayout>
+
+        <!-- 2. ChatGPT PLUS -->
+        <LinearLayout
+            android:id="@+id/card_chatgpt"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="4dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ChatGPT"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_plus"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:text="PLUS"
+                    android:textColor="#6EE7B7"
+                    android:textSize="9sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_cg_pct"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="已用 0% (0/80)"
+                android:textColor="#34D399"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginBottom="6dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginBottom="6dp">
+                <ProgressBar
+                    android:id="@+id/pb_cg_green"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_green" />
+                <ProgressBar
+                    android:id="@+id/pb_cg_amber"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_amber" />
+                <ProgressBar
+                    android:id="@+id/pb_cg_red"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_red" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_cg_reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="待機 · 3h視窗"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Row 2: Grok FREE + Manus FREE -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- 3. Grok FREE -->
+        <LinearLayout
+            android:id="@+id/card_grok"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginRight="4dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Grok"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_free"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:text="FREE"
+                    android:textColor="#D1D5DB"
+                    android:textSize="9sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_gk_pct"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="已用 0% (0/10)"
+                android:textColor="#34D399"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginBottom="6dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginBottom="6dp">
+                <ProgressBar
+                    android:id="@+id/pb_gk_green"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_green" />
+                <ProgressBar
+                    android:id="@+id/pb_gk_amber"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_amber" />
+                <ProgressBar
+                    android:id="@+id/pb_gk_red"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_red" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_gk_reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="待機 · 2h視窗"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+        </LinearLayout>
+
+        <!-- 4. Manus FREE -->
+        <LinearLayout
+            android:id="@+id/card_manus"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="4dp"
+            android:orientation="vertical"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_card"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Manus"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:singleLine="true" />
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_free"
+                    android:paddingLeft="4dp"
+                    android:paddingRight="4dp"
+                    android:paddingTop="1dp"
+                    android:paddingBottom="1dp"
+                    android:text="FREE"
+                    android:textColor="#D1D5DB"
+                    android:textSize="9sp" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_mn_pct"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="已用 0% (0/2)"
+                android:textColor="#34D399"
+                android:textSize="11.5sp"
+                android:textStyle="bold"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:layout_marginBottom="6dp" />
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="6dp"
+                android:layout_marginBottom="6dp">
+                <ProgressBar
+                    android:id="@+id/pb_mn_green"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:progressDrawable="@drawable/progress_green" />
+                <ProgressBar
+                    android:id="@+id/pb_mn_amber"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_amber" />
+                <ProgressBar
+                    android:id="@+id/pb_mn_red"
+                    style="?android:attr/progressBarStyleHorizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:max="100"
+                    android:progress="0"
+                    android:visibility="gone"
+                    android:progressDrawable="@drawable/progress_red" />
+            </FrameLayout>
+
+            <TextView
+                android:id="@+id/tv_mn_reset"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="待機 · 24h視窗"
+                android:textColor="#94A3B8"
+                android:textSize="10.5sp"
+                android:singleLine="true"
+                android:ellipsize="end" />
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

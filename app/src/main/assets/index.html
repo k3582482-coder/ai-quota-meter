@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI 額度錶</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0b0c10;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .widget-box {
+      width: 100%;
+      max-width: 420px;
+      background: #161821;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 26px;
+      padding: 16px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.65);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      padding: 0 2px;
+    }
+    .title-group { display: flex; align-items: baseline; gap: 8px; }
+    .title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+    .status-btn {
+      background: none; border: none; color: #9ca3af; font-size: 12px; cursor: pointer;
+    }
+    .btn-group { display: flex; gap: 6px; }
+    .pill-btn {
+      background: rgba(255,255,255,0.07);
+      border: none;
+      color: #e5e7eb;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .pill-btn:active { background: rgba(255,255,255,0.16); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .card {
+      background: #212431;
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 18px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 122px;
+      cursor: pointer;
+      transition: transform 0.1s ease, background 0.15s ease;
+    }
+    .card:active { transform: scale(0.97); background: #292d3d; }
+    .card-top {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+    }
+    .card-name { font-size: 16px; font-weight: 700; }
+    .badge {
+      font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 5px;
+    }
+    .badge-pro { background: rgba(245,158,11,0.2); color: #fcd34d; border: 1px solid rgba(245,158,11,0.35); }
+    .badge-plus { background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.35); }
+    .badge-free { background: rgba(255,255,255,0.1); color: #d1d5db; }
+    .pct-label { font-size: 12.5px; font-weight: 600; margin-bottom: 8px; font-variant-numeric: tabular-nums; }
+    .sub-label { font-size: 11.5px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums; }
+    .track { width: 100%; height: 7px; background: #323648; border-radius: 99px; overflow: hidden; margin-bottom: 9px; }
+    .track-sm { height: 5px; margin-bottom: 7px; }
+    .track-sm:last-child { margin-bottom: 0; }
+    .bar { height: 100%; border-radius: 99px; transition: width 0.25s ease; }
+    .reset-text { font-size: 11.5px; color: #94a3b8; font-variant-numeric: tabular-nums; }
+    .hint {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #6b7280;
+      text-align: center;
+      line-height: 1.6;
+    }
+    .c-green { color: #34d399; }
+    .c-amber { color: #fb923c; }
+    .c-red { color: #f87171; }
+    .c-slate { color: #cbd5e1; }
+
+    /* Modal */
+    .modal-bg {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+      display: none; align-items: center; justify-content: center; padding: 14px; z-index: 99;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: #1b1e29; border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 20px; width: 100%; max-width: 420px; max-height: 90vh;
+      overflow-y: auto; padding: 16px; font-size: 12px;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      padding-bottom: 10px; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .close-btn { background: none; border: none; color: #9ca3af; font-size: 18px; cursor: pointer; }
+    .section {
+      background: #12141c; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px; padding: 10px; margin-bottom: 10px;
+    }
+    .section-head {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;
+    }
+    .mini-reset {
+      background: rgba(255,255,255,0.1); border: none; color: #fff;
+      font-size: 11px; padding: 3px 8px; border-radius: 6px; cursor: pointer;
+    }
+    .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+    .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    label { display: block; color: #9ca3af; font-size: 11px; margin-bottom: 3px; }
+    input {
+      width: 100%; background: #1b1e29; color: #fff;
+      border: 1px solid rgba(255,255,255,0.12); border-radius: 8px;
+      padding: 7px 8px; font-size: 12px; outline: none;
+    }
+    input:focus { border-color: #34d399; }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+    .btn-cancel { background: rgba(255,255,255,0.08); border: none; color: #fff; padding: 9px 14px; border-radius: 10px; font-size: 12px; }
+    .btn-save { background: #10b981; border: none; color: #fff; font-weight: 700; padding: 9px 16px; border-radius: 10px; font-size: 12px; }
+  </style>
+</head>
+<body>
+
+  <div class="widget-box">
+    <div class="header">
+      <div class="title-group">
+        <span class="title">AI 額度錶</span>
+        <button id="syncBadge" class="status-btn" onclick="openSettings()">本機模式</button>
+      </div>
+      <div class="btn-group">
+        <button class="pill-btn" onclick="triggerSync(true)">↻ 同步</button>
+        <button class="pill-btn" onclick="openSettings()">⚙ 設定</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- 1. Gemini PRO -->
+      <div class="card" onclick="quickIncrement('gemini')">
+        <div class="card-top">
+          <span class="card-name">Gemini</span>
+          <span class="badge badge-pro">PRO</span>
+        </div>
+        <div>
+          <div id="gmWeekLabel" class="sub-label c-green">週 0% · 待機</div>
+          <div class="track track-sm"><div id="gmWeekBar" class="bar" style="width:0%;background:#34d399;"></div></div>
+          <div id="gmSessLabel" class="sub-label c-slate">段 0% · 3h視窗</div>
+          <div class="track track-sm"><div id="gmSessBar" class="bar" style="width:0%;background:#34d399;"></div></div>
+        </div>
+      </div>
+
+      <!-- 2. ChatGPT PLUS -->
+      <div class="card" onclick="quickIncrement('chatgpt')">
+        <div>
+          <div class="card-top">
+            <span class="card-name">ChatGPT</span>
+            <span class="badge badge-plus">PLUS</span>
+          </div>
+          <div id="cgLabel" class="pct-label c-green">已用 0% (0/80)</div>
+          <div class="track"><div id="cgBar" class="bar" style="width:0%;background:#34d399;"></div></div>
+        </div>
+        <div id="cgReset" class="reset-text">待機 · 3h視窗</div>
+      </div>
+
+      <!-- 3. Grok FREE -->
+      <div class="card" onclick="quickIncrement('grok')">
+        <div>
+          <div class="card-top">
+            <span class="card-name">Grok</span>
+            <span class="badge badge-free">FREE</span>
+          </div>
+          <div id="gkLabel" class="pct-label c-green">已用 0% (0/10)</div>
+          <div class="track"><div id="gkBar" class="bar" style="width:0%;background:#34d399;"></div></div>
+        </div>
+        <div id="gkReset" class="reset-text">待機 · 2h視窗</div>
+      </div>
+
+      <!-- 4. Manus FREE -->
+      <div class="card" onclick="quickIncrement('manus')">
+        <div>
+          <div class="card-top">
+            <span class="card-name">Manus</span>
+            <span class="badge badge-free">FREE</span>
+          </div>
+          <div id="mnLabel" class="pct-label c-green">已用 0% (0/2)</div>
+          <div class="track"><div id="mnBar" class="bar" style="width:0%;background:#34d399;"></div></div>
+        </div>
+        <div id="mnReset" class="reset-text">待機 · 24h視窗</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint">
+    點擊任一卡片即可累加 1 次對話並同步至桌面小工具<br>
+    長按手機桌面 → 小工具 → 新增「AI 額度錶 (2×2)」
+  </div>
+
+  <!-- 設定視窗 -->
+  <div id="settingsModal" class="modal-bg">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">方案額度與雲端同步設定</span>
+        <button class="close-btn" onclick="closeSettings()">✕</button>
+      </div>
+
+      <div class="section">
+        <label>Google Apps Script 雲端同步網址 (電腦/手機共用)</label>
+        <input id="inSyncUrl" type="url" placeholder="https://script.google.com/macros/s/.../exec">
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <strong style="color:#fcd34d;">1. Gemini (PRO：段3h/50次 · 週7天/100次)</strong>
+          <button class="mini-reset" onclick="manualReset('gemini')">歸零</button>
+        </div>
+        <div class="row-2">
+          <div><label>段已用 (%)</label><input id="inGmSessPct" type="number" min="0" max="100"></div>
+          <div><label>段剩餘 (小時)</label><input id="inGmSessHrs" type="number" step="0.1" min="0"></div>
+        </div>
+        <div class="row-2" style="margin-bottom:0;">
+          <div><label>週已用 (%)</label><input id="inGmWeekPct" type="number" min="0" max="100"></div>
+          <div><label>週剩餘 (小時)</label><input id="inGmWeekHrs" type="number" step="0.5" min="0"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <strong style="color:#6ee7b7;">2. ChatGPT (PLUS：每3小時 80 次)</strong>
+          <button class="mini-reset" onclick="manualReset('chatgpt')">歸零</button>
+        </div>
+        <div class="row-3">
+          <div><label>已用 (%)</label><input id="inCgPct" type="number" step="0.25" min="0" max="100"></div>
+          <div><label>剩餘 (時)</label><input id="inCgHrs" type="number" step="0.1" min="0"></div>
+          <div><label>每次+ (%)</label><input id="inCgStep" type="number" step="0.05"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <strong style="color:#38bdf8;">3. Grok (FREE：每2小時 10 次)</strong>
+          <button class="mini-reset" onclick="manualReset('grok')">歸零</button>
+        </div>
+        <div class="row-3">
+          <div><label>已用 (%)</label><input id="inGkPct" type="number" step="1" min="0" max="100"></div>
+          <div><label>剩餘 (時)</label><input id="inGkHrs" type="number" step="0.1" min="0"></div>
+          <div><label>每次+ (%)</label><input id="inGkStep" type="number" step="1"></div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-head">
+          <strong style="color:#c084fc;">4. Manus (FREE：每日 2 次任務)</strong>
+          <button class="mini-reset" onclick="manualReset('manus')">歸零</button>
+        </div>
+        <div class="row-3">
+          <div><label>已用 (%)</label><input id="inMnPct" type="number" step="1" min="0" max="100"></div>
+          <div><label>剩餘 (時)</label><input id="inMnHrs" type="number" step="0.5" min="0"></div>
+          <div><label>每次+ (%)</label><input id="inMnStep" type="number" step="5"></div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeSettings()">取消</button>
+        <button class="btn-save" onclick="saveSettings()">儲存並更新小工具</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const HOUR_MS = 3600 * 1000;
+    const hasNative = typeof window.AndroidBridge !== 'undefined';
+
+    function defaultState() {
+      return {
+        gemini: { weekPct: 0, weekResetAt: 0, weekCycleHours: 168, weekStep: 1, sessionPct: 0, sessionResetAt: 0, sessionCycleHours: 3, sessionStep: 2 },
+        chatgpt: { pct: 0, resetAt: 0, cycleHours: 3, step: 1.25 },
+        grok: { pct: 0, resetAt: 0, cycleHours: 2, step: 10 },
+        manus: { pct: 0, resetAt: 0, cycleHours: 24, step: 50 }
+      };
+    }
+
+    let state = defaultState();
+    let syncUrl = '';
+
+    function loadLocal() {
+      try {
+        if (hasNative) {
+          state = JSON.parse(window.AndroidBridge.getState());
+          syncUrl = window.AndroidBridge.getSyncUrl() || '';
+        } else {
+          state = JSON.parse(localStorage.getItem('ai_quota_v3_state')) || defaultState();
+          syncUrl = localStorage.getItem('ai_quota_sync_url') || '';
+        }
+      } catch (e) {
+        state = defaultState();
+      }
+    }
+
+    function persist() {
+      if (hasNative) {
+        window.AndroidBridge.saveState(JSON.stringify(state), syncUrl);
+      } else {
+        localStorage.setItem('ai_quota_v3_state', JSON.stringify(state));
+        localStorage.setItem('ai_quota_sync_url', syncUrl);
+      }
+      render();
+    }
+
+    function getColor(pct) {
+      if (pct >= 90) return { bar: '#f87171', cls: 'c-red' };
+      if (pct >= 75) return { bar: '#fb923c', cls: 'c-amber' };
+      return { bar: '#34d399', cls: 'c-green' };
+    }
+
+    function pad(n) { return String(Math.floor(n)).padStart(2, '0'); }
+    function fmtPct(v) { return Number(Number(v).toFixed(1)); }
+
+    function fmtCountdown(resetAt, cycleHours, suffix) {
+      if (!resetAt || resetAt <= Date.now()) return `待機 · ${cycleHours}h視窗`;
+      const secs = Math.max(0, Math.floor((resetAt - Date.now()) / 1000));
+      const d = Math.floor(secs / 86400);
+      const h = Math.floor((secs % 86400) / 3600);
+      const m = Math.floor((secs % 3600) / 60);
+      const s = secs % 60;
+      if (d > 0) return `${d}天${pad(h)}時${pad(m)}分${suffix}`;
+      return `${pad(h)}:${pad(m)}:${pad(s)} ${suffix}`;
+    }
+
+    function checkAutoResets() {
+      const t = Date.now();
+      let changed = false;
+      if (state.gemini.weekResetAt > 0 && t >= state.gemini.weekResetAt) { state.gemini.weekPct = 0; state.gemini.weekResetAt = 0; changed = true; }
+      if (state.gemini.sessionResetAt > 0 && t >= state.gemini.sessionResetAt) { state.gemini.sessionPct = 0; state.gemini.sessionResetAt = 0; changed = true; }
+      ['chatgpt', 'grok', 'manus'].forEach(k => {
+        if (state[k].resetAt > 0 && t >= state[k].resetAt) { state[k].pct = 0; state[k].resetAt = 0; changed = true; }
+      });
+      if (changed) persist();
+    }
+
+    function render() {
+      checkAutoResets();
+      document.getElementById('syncBadge').textContent = syncUrl ? '雲端已連線' : '本機模式';
+
+      // Gemini
+      const gwC = getColor(state.gemini.weekPct);
+      const gsC = getColor(state.gemini.sessionPct);
+      const gwEl = document.getElementById('gmWeekLabel');
+      gwEl.textContent = `週 ${fmtPct(state.gemini.weekPct)}% · ${fmtCountdown(state.gemini.weekResetAt, 168, '')}`;
+      gwEl.className = `sub-label ${gwC.cls}`;
+      document.getElementById('gmWeekBar').style.width = `${Math.min(100, state.gemini.weekPct)}%`;
+      document.getElementById('gmWeekBar').style.background = gwC.bar;
+
+      document.getElementById('gmSessLabel').textContent = `段 ${fmtPct(state.gemini.sessionPct)}% · ${fmtCountdown(state.gemini.sessionResetAt, 3, '')}`;
+      document.getElementById('gmSessBar').style.width = `${Math.min(100, state.gemini.sessionPct)}%`;
+      document.getElementById('gmSessBar').style.background = gsC.bar;
+
+      // ChatGPT, Grok, Manus
+      [['chatgpt', 'cg', 1.25], ['grok', 'gk', 10], ['manus', 'mn', 50]].forEach(([key, prefix, defStep]) => {
+        const item = state[key];
+        const col = getColor(item.pct);
+        const step = item.step || defStep;
+        const cnt = Math.round(item.pct / step);
+        const max = Math.round(100 / step);
+        const lbl = document.getElementById(prefix + 'Label');
+        lbl.textContent = `已用 ${fmtPct(item.pct)}% (${cnt}/${max})`;
+        lbl.className = `pct-label ${col.cls}`;
+        const bar = document.getElementById(prefix + 'Bar');
+        bar.style.width = `${Math.min(100, item.pct)}%`;
+        bar.style.background = col.bar;
+        document.getElementById(prefix + 'Reset').textContent = fmtCountdown(item.resetAt, item.cycleHours, '重置');
+      });
+    }
+
+    function quickIncrement(service) {
+      const t = Date.now();
+      if (service === 'gemini') {
+        if (!state.gemini.sessionResetAt || state.gemini.sessionResetAt <= t) state.gemini.sessionResetAt = t + (state.gemini.sessionCycleHours || 3) * HOUR_MS;
+        if (!state.gemini.weekResetAt || state.gemini.weekResetAt <= t) state.gemini.weekResetAt = t + (state.gemini.weekCycleHours || 168) * HOUR_MS;
+        state.gemini.sessionPct = Math.min(100, state.gemini.sessionPct + (state.gemini.sessionStep || 2));
+        state.gemini.weekPct = Math.min(100, state.gemini.weekPct + (state.gemini.weekStep || 1));
+      } else {
+        const item = state[service];
+        if (!item.resetAt || item.resetAt <= t) item.resetAt = t + (item.cycleHours || 3) * HOUR_MS;
+        item.pct = Math.min(100, item.pct + (item.step || 1));
+      }
+      persist();
+    }
+
+    function manualReset(service) {
+      if (service === 'gemini') {
+        state.gemini.weekPct = 0; state.gemini.weekResetAt = 0;
+        state.gemini.sessionPct = 0; state.gemini.sessionResetAt = 0;
+      } else {
+        state[service].pct = 0; state[service].resetAt = 0;
+      }
+      persist();
+      fillInputs();
+    }
+
+    function fillInputs() {
+      const t = Date.now();
+      document.getElementById('inSyncUrl').value = syncUrl;
+      document.getElementById('inGmSessPct').value = state.gemini.sessionPct;
+      document.getElementById('inGmSessHrs').value = state.gemini.sessionResetAt > t ? ((state.gemini.sessionResetAt - t) / HOUR_MS).toFixed(2) : 3;
+      document.getElementById('inGmWeekPct').value = state.gemini.weekPct;
+      document.getElementById('inGmWeekHrs').value = state.gemini.weekResetAt > t ? ((state.gemini.weekResetAt - t) / HOUR_MS).toFixed(1) : 168;
+
+      document.getElementById('inCgPct').value = state.chatgpt.pct;
+      document.getElementById('inCgHrs').value = state.chatgpt.resetAt > t ? ((state.chatgpt.resetAt - t) / HOUR_MS).toFixed(2) : 3;
+      document.getElementById('inCgStep').value = state.chatgpt.step || 1.25;
+
+      document.getElementById('inGkPct').value = state.grok.pct;
+      document.getElementById('inGkHrs').value = state.grok.resetAt > t ? ((state.grok.resetAt - t) / HOUR_MS).toFixed(2) : 2;
+      document.getElementById('inGkStep').value = state.grok.step || 10;
+
+      document.getElementById('inMnPct').value = state.manus.pct;
+      document.getElementById('inMnHrs').value = state.manus.resetAt > t ? ((state.manus.resetAt - t) / HOUR_MS).toFixed(1) : 24;
+      document.getElementById('inMnStep').value = state.manus.step || 50;
+    }
+
+    function openSettings() {
+      fillInputs();
+      document.getElementById('settingsModal').classList.add('open');
+    }
+
+    function closeSettings() {
+      document.getElementById('settingsModal').classList.remove('open');
+    }
+
+    function saveSettings() {
+      const t = Date.now();
+      syncUrl = document.getElementById('inSyncUrl').value.trim();
+
+      const gmSP = Number(document.getElementById('inGmSessPct').value);
+      state.gemini.sessionPct = gmSP;
+      state.gemini.sessionResetAt = gmSP > 0 ? t + Number(document.getElementById('inGmSessHrs').value) * HOUR_MS : 0;
+
+      const gmWP = Number(document.getElementById('inGmWeekPct').value);
+      state.gemini.weekPct = gmWP;
+      state.gemini.weekResetAt = gmWP > 0 ? t + Number(document.getElementById('inGmWeekHrs').value) * HOUR_MS : 0;
+
+      const cgP = Number(document.getElementById('inCgPct').value);
+      state.chatgpt.pct = cgP;
+      state.chatgpt.resetAt = cgP > 0 ? t + Number(document.getElementById('inCgHrs').value) * HOUR_MS : 0;
+      state.chatgpt.step = Number(document.getElementById('inCgStep').value) || 1.25;
+
+      const gkP = Number(document.getElementById('inGkPct').value);
+      state.grok.pct = gkP;
+      state.grok.resetAt = gkP > 0 ? t + Number(document.getElementById('inGkHrs').value) * HOUR_MS : 0;
+      state.grok.step = Number(document.getElementById('inGkStep').value) || 10;
+
+      const mnP = Number(document.getElementById('inMnPct').value);
+      state.manus.pct = mnP;
+      state.manus.resetAt = mnP > 0 ? t + Number(document.getElementById('inMnHrs').value) * HOUR_MS : 0;
+      state.manus.step = Number(document.getElementById('inMnStep').value) || 50;
+
+      closeSettings();
+      persist();
+    }
+
+    function triggerSync(manual) {
+      if (!syncUrl) {
+        if (manual) openSettings();
+        return;
+      }
+      if (hasNative) {
+        document.getElementById('syncBadge').textContent = '同步中...';
+        window.AndroidBridge.syncNow();
+      }
+    }
+
+    window.onNativeSynced = function(ok) {
+      loadLocal();
+      render();
+      if (!ok && syncUrl) {
+        document.getElementById('syncBadge').textContent = '同步重試';
+      }
+    };
+
+    loadLocal();
+    render();
+    if (syncUrl) triggerSync(false);
+    setInterval(render, 1000);
+  </script>
+</body>
+</html>
